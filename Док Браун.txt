@@ -1,0 +1,441 @@
+import os
+import random
+import json
+import logging
+import telebot
+import gspread
+import datetime
+import yadisk
+import time
+
+from telebot import types
+
+googlesheet_id = '1T4BpctXyc_1dNJZ-zZttGrKqpaWBYMQ9IuGGA89nDYg'
+googlesheet_id2 = '1xOBzeJY-iDi4wMtHeP5YccJVopm7boY7dsNYyxIvtGw'
+gc = gspread.service_account("./service_account.json")
+shUser = gc.open_by_key(googlesheet_id).sheet1
+shID = gc.open_by_key(googlesheet_id2).sheet1
+
+bot = telebot.TeleBot(os.environ.get('BOT_TOKEN'))
+#y = yadisk.YaDisk(token='YADISK_TOKEN')
+
+user_game = {}
+
+
+# --------------------- bot ---------------------
+
+# --------------- start/help --------------------
+@bot.message_handler(commands=['start'])
+def start(message):
+    m = 'CAACAgIAAxkBAAEFLDFiv24mBpgw3Arrp_rutI2qcMjyJgACYAIAArrAlQWRGahphbj0xSkE'
+    mess = f'Наконец-то!!! Ты чего так долго?😑 Мне уже надоело тут сидеть! Давай будем меня спасать…'
+    bot.send_sticker(message.chat.id, m)
+    bot.send_message(message.chat.id, mess) 
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    s = types.KeyboardButton('/регистрация')
+    markup.add(s)
+    bot.send_message(message.chat.id, '⁉ Так стоп! А ты вообще кто? \nЗайди в /регистрация', reply_markup=markup)
+    idi = message.from_user.id
+    shID.append_row([idi])
+    
+
+
+@bot.message_handler(commands=['помощь'])
+def help_gamer(message):
+    global user_game
+    mess = '🧐 Что я могу: 🔎'
+    m1 = f'/регистрация - Регистрация нового персонажа'
+    m2 = f'/статистика - Посмотреть статистику по своему персонажу'
+    m3 = f'/загадка - Ежедневные индивидуальные загадки'
+    m4 = f'/выход - Выход в меню игрока'
+    bot.send_message(message.chat.id, mess+'\n'+m1+'\n'+m2+'\n'+m3+'\n'+m4)
+    bot.send_message(message.chat.id, user_game)
+
+
+
+# ---------------- signup ----------------------
+
+@bot.message_handler(commands=['регистрация'])
+
+#          ------ name -------
+def ButSignUp(message):
+    bot.send_message(message.chat.id, '👾 Добро пожаловать в раздел регистрации!')
+    bot.send_message(message.chat.id, 'Создай своего персонажа 🧍и отправляйся на мои поиски')
+    bot.send_message(message.chat.id, 'Так же ты можешь зарегистрировать друга 👫, если у него проблемы с интернетом 📵')
+    bot.send_message(message.chat.id, 'Введи Фамилию и Имя')
+    msg = bot.send_message(message.chat.id, 'Вводи корректные данные, иначе я не смогу с тобой общаться', reply_markup=types.ReplyKeyboardRemove())
+    bot.register_next_step_handler(msg, get_password)
+
+#          ------ password -------
+def get_password(message):
+    global user_game
+    name = message.text
+    if name != '/выход':
+        if shUser.find(name):
+            bot.send_message(message.chat.id, 'Такой пользователь уже создан 🤷. Начни регистрацию заново.')
+        else:
+            user_game[name] = {}
+            msg = bot.send_message(message.chat.id, 'Придумай пароль 🔒\nЗапомни его, после ввода он исчезнет. Узнать его ты сможешь только у моего помощника геймификатора.')
+            bot.register_next_step_handler(msg, get_area, name)
+    else:
+        bot.send_message(message.chat.id, '⚠ ⚠ ⚠')
+        bot.send_message(message.chat.id, 'Произошла перегрузка сервера... Машина времени запущена...', reply_markup=types.ReplyKeyboardRemove())
+        m = 'CAACAgIAAxkBAAEFLEdiv3QmtnJb7Gozpz1t8k9nPGj-gwACWwIAArrAlQVHEDI9MpTlvSkE'
+        bot.send_sticker(message.chat.id, m)
+        time.sleep(1)
+        bot.send_message(message.chat.id, 'Отправка в 11.07.1985 через')
+        bot.send_message(message.chat.id, '3')
+        time.sleep(1)
+        bot.send_message(message.chat.id, '2')
+        time.sleep(1)
+        bot.send_message(message.chat.id, '1')
+        time.sleep(1)
+        bot.send_message(message.chat.id, '0')
+        bot.send_message(message.chat.id, 'Вы в 11.07.1985')
+        bot.send_message(message.chat.id, 'Ожидайте подключения...')        
+        
+#          ------ area -------
+def get_area(message, name_user):
+    global user_game
+    password = message.text
+    user_game[name_user]['password'] = password
+    bot.delete_message(message.chat.id, message.message_id)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    area1 = types.KeyboardButton('ЦАО 💛')
+    area2 = types.KeyboardButton('СЗАО 🧡')
+    area3 = types.KeyboardButton('САО 💙')
+    area4 = types.KeyboardButton('ЗелАО 💚')
+    area5 = types.KeyboardButton('СВАО 💜')
+    area6 = types.KeyboardButton('УГСО ❤')
+    markup.add(area1, area2, area3, area4, area5, area6)
+    msg = bot.send_message(message.chat.id, 'Выберите округ 🌍', reply_markup=markup)
+    bot.register_next_step_handler(msg, get_name, name_user)
+
+#          ------ verify -------   
+def get_name(message, name_user):
+    global user_game
+    user_game[name_user]['area'] = message.text
+    area = user_game[name_user]['area']
+    mess = f'Ты из {area}. Тебя зовут {name_user}. Все верно?'
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    yes = types.KeyboardButton('Да')
+    no = types.KeyboardButton('Нет')
+    markup.add(yes, no)
+    msg = bot.send_message(message.from_user.id, mess, reply_markup=markup)
+    bot.register_next_step_handler(msg, get_yn, name_user)
+
+#          ------ persons -------
+def get_yn(message, name_user):
+    global user_game
+    if message.text == 'Нет':
+        del user_game[name_user]
+        bot.register_next_step_handler(msg, ButSignUp)
+    elif message.text == 'Да':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        area1 = types.KeyboardButton('Ниндзя 🥷')
+        area2 = types.KeyboardButton('Фея 🧚')
+        area3 = types.KeyboardButton('Сыщик 🕵')
+        area4 = types.KeyboardButton('Эльф 🧝')
+        area5 = types.KeyboardButton('Русалка 🧜')
+        area6 = types.KeyboardButton('Вампир 🧛')
+        markup.add(area1, area2, area3, area4, area5, area6)
+        msg = bot.send_message(message.chat.id, 'Выбери персонажа 🧍(именно он будет отображаться у тебя в дальнейшем)', reply_markup=markup)
+        bot.register_next_step_handler(msg, finish_reg, name_user)
+
+#          ------ result  -------
+def finish_reg(message, name_user):
+    global user_game
+    user_game[name_user]['pers'] = message.text
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    h = types.KeyboardButton('Да')
+    s = types.KeyboardButton('Нет')    
+    markup.add(h, s)
+    bot.send_message(message.chat.id, 'Поздравляю! Терепь мы знакомы!😎')
+    user_game[name_user]['money'] = 0
+    user_game[name_user]['stat'] = 'Новичок'
+    area = user_game[name_user]['area']
+    pers = user_game[name_user]['pers']
+    money = user_game[name_user]['money']
+    stat = user_game[name_user]['stat']
+    pas = user_game[name_user]['password']
+    idi = message.from_user.id
+    bot.send_message(message.chat.id, f'{name_user}\n🧍:   {pers}\n🌍:   {area}')
+    msg = bot.send_message(message.chat.id, 'Хочешь еще кого-то заргистрировать?', reply_markup=markup)
+    bot.register_next_step_handler(msg, YesNoRegister)
+    shUser.append_row([name_user, pas, area, pers, money, stat, idi])
+
+
+
+def YesNoRegister(message):
+    if message.text == 'Да':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/выход')   
+        markup.add(h)
+        msg = bot.send_message(message.chat.id, 'Введи Фамилию и Имя друга', reply_markup=markup)
+        bot.register_next_step_handler(msg, get_password)
+    else:
+        bot.send_message(message.chat.id, '⚠ ⚠ ⚠')
+        bot.send_message(message.chat.id, 'Произошла перегрузка сервера... Машина времени запущена...', reply_markup=types.ReplyKeyboardRemove())
+        m = 'CAACAgIAAxkBAAEFLEdiv3QmtnJb7Gozpz1t8k9nPGj-gwACWwIAArrAlQVHEDI9MpTlvSkE'
+        bot.send_sticker(message.chat.id, m)
+        time.sleep(1)
+        bot.send_message(message.chat.id, 'Отправка в 11.07.1985 через')
+        bot.send_message(message.chat.id, '3')
+        time.sleep(1)
+        bot.send_message(message.chat.id, '2')
+        time.sleep(1)
+        bot.send_message(message.chat.id, '1')
+        time.sleep(1)
+        bot.send_message(message.chat.id, '0')
+        bot.send_message(message.chat.id, 'Вы в 11.07.1985')
+        bot.send_message(message.chat.id, 'Ожидайте подключения...')
+
+
+        
+
+
+
+# ----------------- statistic ------------------------
+
+@bot.message_handler(commands=['статистика'])
+def ButLogin(message):
+    msg = bot.send_message(message.chat.id, 'Введи Фамилию и Имя и я покажу твою статистику 🤑', reply_markup=types.ReplyKeyboardRemove())
+    bot.register_next_step_handler(msg, PassWord)
+
+def PassWord(message):
+    name = message.text
+    if shUser.find(name):
+        cell_row = shUser.find(name).row
+        msg = bot.send_message(message.chat.id, 'Введи пароль 🔒')
+        bot.register_next_step_handler(msg, MyStat, cell_row)
+    else:
+        bot.send_message(message.chat.id, 'Такой персонаж не найден 😢\nПроверь имя или Зарегистрируйся!')
+    
+
+def MyStat(message, cell_row):
+    if message.text == shUser.cell(cell_row, 2).value:
+        bot.delete_message(message.chat.id, message.message_id)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        a = types.KeyboardButton('/выход')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l, a)
+        name_user = shUser.cell(cell_row, 1).value
+        area = shUser.cell(cell_row, 3).value
+        pers = shUser.cell(cell_row, 4).value
+        money = shUser.cell(cell_row, 5).value
+        stat = shUser.cell(cell_row, 6).value
+        bot.send_message(message.chat.id, f'{name_user}\n🧍:   {pers}\n🌍:   {area}\n💰:   {money} pixel\n🏆:   {stat}', reply_markup=markup)
+    elif message.text != '/выход':
+        msg = bot.send_message(message.chat.id, 'Не верный пароль 🤐\nПопробуй еще раз или нажми /выход')
+        bot.register_next_step_handler(msg, MyStat, cell_row)
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+        
+
+
+
+
+
+# ------------------ riddles --------------------
+@bot.message_handler(commands=['загадка'])
+def SendName(message):
+    msg = bot.send_message(message.chat.id, 'Введи Фамилию и Имя для получения задания', reply_markup=types.ReplyKeyboardRemove())
+    bot.register_next_step_handler(msg, PassWord)
+
+def Pass_Word(message):
+    name = message.text
+    if shUser.find(name):
+        cell_row = shUser.find(name).row
+        msg = bot.send_message(message.chat.id, 'Введи пароль 🔒')
+        bot.register_next_step_handler(msg, Riddles, cell_row)
+    elif name != '/выход':
+        msg = bot.send_message(message.chat.id, 'Такой персонаж не найден 😢\nПроверь имя или Зарегистрируйся!')
+        bot.register_next_step_handler(msg, Pass_Word)
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+    
+
+def Riddles(message, cell_row):
+    if message.text == shUser.cell(cell_row, 2).value:
+        bot.delete_message(message.chat.id, message.message_id)
+        time_day_start_morn = datetime.time(5, 0, 0)
+        time_day_finish_morn = datetime.time(5, 30, 0)
+        time_day_start_ev = datetime.time(16, 0, 0)
+        time_day_finish_ev = datetime.time(16, 30, 0)
+        time_center = datetime.time(12, 0, 0)
+        date_now = datetime.datetime.now()
+        time_now = date_now.time()
+        date_today = datetime.date.today()
+        number_day = date_today.day
+
+# ------------- check time -----------------        
+        if time_now < time_center:
+            if time_day_finish_morn >= time_now >= time_day_start_morn:
+                if number_day == 22:
+                    bot.send_photo(message.chat.id, 'https://storage.yandexcloud.net/tg-bot-merlin/Day12.jpg')
+                if number_day > 22:
+                    bot.send_photo(message.chat.id, 'https://storage.yandexcloud.net/tg-bot-merlin/Day12.jpg')
+            elif time_day_finish_morn <= time_now:
+                bot.send_message(message.chat.id, 'Поздновато ты решил поработать мозгами. Ожидай вечернюю загадку...')
+            else:
+                bot.send_message(message.chat.id, 'Рановато ты решил поработать мозгами. Прояви терпение до 8:00 ...')
+        else:
+            if time_day_finish_ev >= time_now >= time_day_start_ev:
+                if number_day == 22:
+                    bot.send_photo(message.chat.id, 'https://storage.yandexcloud.net/tg-bot-merlin/Day12.jpg')
+                if number_day > 22:
+                    bot.send_photo(message.chat.id, 'https://storage.yandexcloud.net/tg-bot-merlin/Day12.jpg')
+            elif time_day_finish_ev <= time_now:
+                bot.send_message(message.chat.id, 'Поздновато ты решил поработать мозгами. Ожидай утреннюю загадку...')
+            else:
+                bot.send_message(message.chat.id, 'Рановато ты решил поработать мозгами. Прояви терпение до 19:00 ...')
+        
+        
+        #money = shUser.cell(cell_row, 5).value
+        #bot.send_message(message.chat.id, f'Супер! Твой баланс:\n💰:   {money} pixel')
+
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+
+    elif message.text != '/выход':
+        msg = bot.send_message(message.chat.id, 'Не верный пароль 🤐\nПопробуй еще раз или нажми /выход')
+        bot.register_next_step_handler(msg, Riddles, cell_row)
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+
+
+
+
+
+
+
+# -------------------photo ----------------------
+@bot.message_handler(content_types=['photo'])
+def SendPhoto(message):
+    foto = message.photo[-1].file_id
+    markup = types.ReplyKeyboardMarkup()
+    h = types.KeyboardButton('Сохранить в архив Нового Вектора')
+    g = types.KeyboardButton('Просто сохраняю воспоминания')
+    a = types.KeyboardButton('Отправить другу')
+    markup.add(h).add(a).add(g)
+    msg = bot.send_message(message.chat.id, 'Крутая фотка 🔥\nЧто хочешь с ней сделать?', reply_markup=markup)
+    bot.register_next_step_handler(msg, MyPhoto, foto)
+
+def MyPhoto(message, foto):
+    if message.text == 'Сохранить в архив Нового Вектора':
+        chanel_id = '-1001551742821'
+        bot.send_photo(chanel_id, foto)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Отлично! Фото улетело в архив! Продолжай в том же духе 😜', reply_markup=markup)
+    if message.text == 'Просто сохраняю воспоминания':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        #bot.send_photo(message.chat.id, foto)
+        bot.send_message(message.chat.id, 'Отлично! Продолжай в том же духе 😜', reply_markup=markup)
+    if message.text == 'Отправить другу':
+        msg = bot.send_message(message.chat.id, 'Введи Фамилию и Имя друга')
+        bot.register_next_step_handler(msg, NameFriend, foto)
+    
+def NameFriend(message, foto):
+    name = message.text
+    if shUser.find(name):
+        cell_row = shUser.find(name).row
+        id_friend = int(shUser.cell(cell_row, 7).value)
+        #bot.send_message(message.chat.id, id_friend)
+        bot.send_message(message.chat.id, 'Фотка отправлена!')
+        user_name = message.from_user.username
+        bot.send_message(id_friend, f'{user_name} отправил тебе фото)')
+        bot.send_photo(id_friend, foto)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('Да')
+        s = types.KeyboardButton('Нет')
+        markup.add(h, s)
+        msg = bot.send_message(message.chat.id, 'Хочешь отправить еще кому-то?', reply_markup=markup)
+        bot.register_next_step_handler(msg, YesNo, foto)
+    elif name != '/выход':
+        msg = bot.send_message(message.chat.id, 'Такой персонаж не найден 😢\nПроверь имя или введи /выход')
+        bot.register_next_step_handler(msg, NameFriend, foto)
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+
+def YesNo(message, foto):
+    if message.text == 'Да':
+        msg = bot.send_message(message.chat.id, 'Введи Фамилию и Имя друга')
+        bot.register_next_step_handler(msg, NameFriend, foto)
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        h = types.KeyboardButton('/помощь')
+        s = types.KeyboardButton('/регистрация')
+        g = types.KeyboardButton('/загадка')
+        l = types.KeyboardButton('/статистика')
+        markup.add(h, s, g, l)
+        bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+
+
+
+# ------------------- exit ----------------------
+@bot.message_handler(commands=['выход'])
+def Exit(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    h = types.KeyboardButton('/помощь')
+    s = types.KeyboardButton('/регистрация')
+    g = types.KeyboardButton('/загадка')
+    l = types.KeyboardButton('/статистика')
+    markup.add(h, s, g, l)
+    bot.send_message(message.chat.id, 'Чем я могу помочь? 🙂', reply_markup=markup)
+
+
+
+
+
+# ------------------- DIALOG --------------------
+@bot.message_handler(content_types=['text'])
+def Mess(message):
+    bot.send_message(message.chat.id, 'Связь потеряна... Попробуй зайти в раздел еще раз')
+
+
+
+# ---------------- local testing ----------------
+if __name__ == '__main__':    
+    bot.infinity_polling()

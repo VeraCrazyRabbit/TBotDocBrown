@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "bot-users-353714",
+  "private_key_id": "4c1f85bf28e774b1352b6ee9dc15892699cc1359",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCuzFrsjoGdCz95\nbZck+hYxlBAfgMtCdUc7NGLYhxb9ifZNM9BBsw1o+UJ1RWLWVDtL9ftV1+xYYyLm\neoPi6LClLGZaTY9cQqwMBFAmueSFRZR6FhcAMdgnyMpJJZ8koo7+rAoi9Hqc+RB2\n/8HZUw21+kFZAyP2JKP3H8/OwDpWnUL4dh6zMscKGaP1u0X1f+3FQppm2rsiAonF\nqvAy74rQlpiKce1XUfXwRxc84wHCZGHJNelgiaD+krMqDeORgAFIk/hjoSXxI9xI\nn+uOSkQO4IbfLsFcOoaeoievdjhUmBm3CEFg1wWfn642wywGmUvuULS/dolM1+c2\nn/z5QDVrAgMBAAECggEACq4n/YIXSuWMiz8NCl4jfk0DNAq2Mvb7pZM4EFuUuD/a\n+JWhYiNuY2aKYVr5xNLpupuGHadvUkSpkS1wx2K/7XslqiRtezuWOW6Zv2m4wJZ1\nkc4bS9CI/qS9w2qLtI9EwZodTUx2/SrQIV+KeNy05/kXKu/OizQhyOcYVxQpUzmK\nEsZ9TOtFUox8E3dyLA091PDJ3L3nLg42FuMBAJ/bKozuFLg8yZ48K5lbymhRcBR2\nMA4p124Cb/3nWpFBW2OKQHGvOu2jPZ+uNDuKJxgFPEP0CcL3yGi6Zp5P4rvlscxQ\nWPLCF5v90UF9o4gYkdUSxCRyjDkwNNAa+zPRQyux1QKBgQDdQ+SVak+P2JR/s98t\nvkTUonr5xSWOPhnv5Oh9aEt2sqaX/MdCUkgpFVRWuRIEtNuYqOzMa4qRGu4AlcB0\nOtF1VYmyY43AYfvWuNvUUH6qmbNUwGpMwxWkOXn7GuaZRMBtvr5OlGZUnpwD2GLM\nJZPY3fdPSKzr9sTbFaUhm8fbjwKBgQDKPRHLQxs/stYNHO8ZtrRSeWzWDFFFWdEc\nceTPFclSgCyPAzuGT1/IJOeabDzERojfohG12YLgbz7VnES+xsynSQH5ZAxoiutM\nhCIilvG7KtKWSQsSpYE4mMa2SIseary5lYAlJKGgK36elMn9efqvQj80Z6FOcjKR\nrrjJgH0KZQKBgA+cirRAG/z6OwAHoOeJVTHrhOG6lzvCBfJ3JDA0+54UXMy8eRKk\n25KKfrjftfW/DP9oa8zAibZTQBeqeTm6LK0qq9x6SbYZM7uir1/7jfRbg9um99kS\nqqQ7qe+dpkeKIkmb+7FvpwixaDCdQ9tDi3rxrlFZv1mmv5z1mgEVDLThAoGAPZG6\nCRe1A/9+Cx/z6vAklbdB2yiE1YgykWZbMnB/ig5bgm6JgKpJjrUtjWXGWjrfELZW\njfZaUdmMV5vrkekUBRnE8Bf1bx5b5D+V5NHvZfvzgK1cIaEhZgmc9YHAWNJGAnnx\nOV2dlxWmxsClffXUy+ZvN5UVFrzNiGyY9T+Y0cECgYA3AIXOkSipNXgnagv73s2q\nqmfF8pGes7RgO0uG7KdLXORB4yjxnwqOm4hW+kYH7oK53pvDhYNJzDN4jRdKxvae\nSbSPUIJslTvpueFs+aevasc/2gujti4QfD33Bcss+WL4KXyaPcN3polBUAT7y5g6\nO4+cxcXm/zCovhKZx0k8Vw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "vecrot-bot@bot-users-353714.iam.gserviceaccount.com",
+  "client_id": "102752329856967738095",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vecrot-bot%40bot-users-353714.iam.gserviceaccount.com"
+}
